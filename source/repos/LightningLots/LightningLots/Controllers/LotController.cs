@@ -91,8 +91,6 @@ namespace LightningLots.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (model.Attachment != null)
-                {
                     Lot lot = lotRepo.GetById(model.Id);
                     lot.LotName = model.LotName;
                     lot.CreationTimeStamp = model.CreationTimeStamp;
@@ -109,19 +107,24 @@ namespace LightningLots.Controllers
                     }
 
                     lotRepo.Update(lot);
-                    return RedirectToAction("Index");
-                }
+                    return RedirectToAction("Index", "Lot");
             }
             return View();
         }
 
         private string ProcessUploadedFile(LotCreateViewModel model)
         {
-            string uniqueFileName;
-            string uploadsFolder = Path.Combine(hostingEnvironment.WebRootPath, "coa");
-            uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Attachment.FileName;
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-            model.Attachment.CopyTo(new FileStream(filePath, FileMode.Create));
+            string uniqueFileName = null;
+            if (model.Attachment != null)
+            {
+                string uploadsFolder = Path.Combine(hostingEnvironment.WebRootPath, "coa");
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Attachment.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    model.Attachment.CopyTo(fileStream);
+                }
+            }
             return uniqueFileName;
         }
 
