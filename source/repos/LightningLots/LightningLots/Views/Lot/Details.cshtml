@@ -1,0 +1,66 @@
+﻿@model LightningLots.Models.ViewModel.Lot
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Lots</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.LotName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.LotName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreationTimeStamp)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreationTimeStamp)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Weight)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Weight)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-controller="Lot" asp-action="Update" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+<hr />
+<div id="reagents">
+    @foreach (var item in Model.Reagents)
+    {
+        <div>
+            <p>
+                @Html.DisplayFor(modelItem => item.Name)
+            </p>
+            <p>
+                @Html.DisplayFor(modelItem => item.IsQuarantineComplete)
+            </p>
+            <p>
+                @Html.DisplayFor(modelItem => item.ReceiptTimeStamp)
+            </p>
+            <p>
+                @Html.DisplayFor(modelItem => item.Weight)
+            </p>
+            <p>
+                @Html.DisplayFor(modelItem => item.Lot.Id)
+            </p>
+            <div>
+                <a asp-controller="Reagent" asp-action="Update" asp-route-id="@item.Id">Update</a> |
+                <a asp-controller="Reagent" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-controller="Reagent" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </div>
+        </div>
+    }
+</div>
