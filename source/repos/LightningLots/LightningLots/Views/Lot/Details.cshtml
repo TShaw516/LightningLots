@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var attachmentPath = "~/Images/" + (Model.AttachmentPath ?? "LightningLogo.jpg");
 }
 
 <h1>Details</h1>
@@ -29,6 +30,13 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Weight)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AttachmentPath)
+        </dt>
+        <dd class="col-sm-10">
+            <img src="@attachmentPath" />
+            @Html.DisplayFor(model => model.AttachmentPath)
         </dd>
     </dl>
 </div>

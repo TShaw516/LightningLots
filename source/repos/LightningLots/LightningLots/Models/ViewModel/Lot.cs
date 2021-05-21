@@ -11,6 +11,7 @@ namespace LightningLots.Models.ViewModel
         public int Id { get; set; }
         public DateTime CreationTimeStamp { get; set; }
         public double Weight { get; set; }
+        public string AttachmentPath { get; set; }
         public virtual ICollection<Reagent> Reagents { get; set; }
 
         public Lot()

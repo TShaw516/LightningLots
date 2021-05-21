@@ -4,14 +4,16 @@ using LightningLots.Models.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LightningLots.Migrations
 {
     [DbContext(typeof(LightningLotsContext))]
-    partial class LightningLotsContextModelSnapshot : ModelSnapshot
+    [Migration("20210521055244_File Upload")]
+    partial class FileUpload
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -1,17 +1,23 @@
 ﻿using LightningLots.Models.ViewModel;
 using LightningLots.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
 
 namespace LightningLots.Controllers
 {
     public class LotController : Controller
     {
         IRepository<Lot> lotRepo;
+        private readonly IWebHostEnvironment hostingEnvironment;
 
-        public LotController(IRepository<Lot> lotRepo)
+        public LotController(IRepository<Lot> lotRepo,
+                             IWebHostEnvironment hostingEnvironment)
         {
             this.lotRepo = lotRepo;
+            this.hostingEnvironment = hostingEnvironment;
         }
 
         [Authorize]
@@ -37,10 +43,29 @@ namespace LightningLots.Controllers
 
         [HttpPost]
         [Authorize]
-        public IActionResult Create(Lot lot)
+        public IActionResult Create(LotCreateViewModel model)
         {
-            lotRepo.Create(lot);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                string uniqueFileName = null;
+                if (model.Attachment != null)
+                {
+                    uniqueFileName = ProcessUploadedFile(model);
+                }
+
+                Lot newLot = new Lot
+                {
+                    LotName = model.LotName,
+                    CreationTimeStamp = model.CreationTimeStamp,
+                    Weight = model.Weight,
+                    AttachmentPath = uniqueFileName,
+                    Reagents = model.Reagents
+                };
+
+                lotRepo.Create(newLot);
+                return RedirectToAction("details", new { id = newLot.Id });
+            }
+            return View();
         }
 
         [HttpGet]
@@ -48,14 +73,56 @@ namespace LightningLots.Controllers
         public ViewResult Update(int id)
         {
             Lot model = lotRepo.GetById(id);
-            return View(model);
+            LotUpdateViewModel lotUpdateViewModel = new LotUpdateViewModel
+            {
+                Id = model.Id,
+                LotName = model.LotName,
+                Weight = model.Weight,
+                CreationTimeStamp = model.CreationTimeStamp,
+                ExistingAttachmentPath = model.AttachmentPath,
+                Reagents = model.Reagents
+            };
+            
+            return View(lotUpdateViewModel);
         }
 
         [HttpPost]
-        public IActionResult Update(Lot lot)
+        public IActionResult Update(LotUpdateViewModel model)
         {
-            lotRepo.Update(lot);
-            return RedirectToAction("Details", "Lot", new { id = lot.Id });
+            if (ModelState.IsValid)
+            {
+                if (model.Attachment != null)
+                {
+                    Lot lot = lotRepo.GetById(model.Id);
+                    lot.LotName = model.LotName;
+                    lot.CreationTimeStamp = model.CreationTimeStamp;
+                    lot.Reagents = model.Reagents;
+                    lot.Weight = model.Weight;
+                    if (model.Attachment != null)
+                    {
+                        if (model.ExistingAttachmentPath != null)
+                        { 
+                            string filePath = Path.Combine(hostingEnvironment.WebRootPath, "coa", model.ExistingAttachmentPath);
+                            System.IO.File.Delete(filePath);
+                        }
+                        lot.AttachmentPath = ProcessUploadedFile(model);
+                    }
+
+                    lotRepo.Update(lot);
+                    return RedirectToAction("Index");
+                }
+            }
+            return View();
+        }
+
+        private string ProcessUploadedFile(LotCreateViewModel model)
+        {
+            string uniqueFileName;
+            string uploadsFolder = Path.Combine(hostingEnvironment.WebRootPath, "coa");
+            uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Attachment.FileName;
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            model.Attachment.CopyTo(new FileStream(filePath, FileMode.Create));
+            return uniqueFileName;
         }
 
         [HttpGet]
